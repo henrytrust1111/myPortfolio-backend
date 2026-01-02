@@ -7,7 +7,7 @@ function getTransporter() {
     secure: false,
     auth: {
       user: process.env.SMTP_USER || "henrytrust1111@gmail.com",
-      pass: process.env.SMTP_PASSWORD || "aczjynglscskmuie",
+      pass: process.env.SMTP_PASSWORD || "dyyaijpjfwuyapam",
     },
   });
 }
