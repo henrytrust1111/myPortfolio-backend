@@ -34,6 +34,15 @@ export async function createContact(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('Contact error:', error);
+    if (error && (error as any).name === 'ValidationError') {
+      const errs = (error as any).errors || {};
+      const messages = Object.keys(errs)
+        .map((k) => errs[k]?.message)
+        .filter(Boolean) as string[];
+      const message = messages.length === 1 ? messages[0] : messages.join('; ');
+      return res.status(400).json({ error: 'Validation failed', message });
+    }
+
     res.status(500).json({ error: 'Failed to save message' });
   }
 }
