@@ -36,10 +36,33 @@ export async function createContact(req: Request, res: Response) {
     console.error('Contact error:', error);
     if (error && (error as any).name === 'ValidationError') {
       const errs = (error as any).errors || {};
-      const messages = Object.keys(errs)
-        .map((k) => errs[k]?.message)
-        .filter(Boolean) as string[];
-      const message = messages.length === 1 ? messages[0] : messages.join('; ');
+
+      const friendly = (err: any, field: string) => {
+        const kind = err.kind || (err.properties && err.properties.kind) || '';
+        // minlength -> "Field must be at least N characters"
+        if (kind === 'minlength' || /minimum allowed length/i.test(err.message || '')) {
+          const match = String(err.message).match(/minimum allowed length \((\d+)\)/i) || String(err.message).match(/minimum.*?(\d+)/i);
+          const min = match ? match[1] : '';
+          return `${field.charAt(0).toUpperCase() + field.slice(1)} must be at least ${min || 'the minimum'} characters.`;
+        }
+
+        // required
+        if (kind === 'required' || /required/i.test(err.message || '')) {
+          return `${field.charAt(0).toUpperCase() + field.slice(1)} is required.`;
+        }
+
+        // email like field
+        if (field.toLowerCase().includes('email')) {
+          return 'Please provide a valid email address.';
+        }
+
+        // fallback: use a cleaned-up version of the original message
+        const cleaned = String(err.message).replace(/Path `.*?`\s*/i, '').replace(/\s*\(.+length.+\)/i, '').trim();
+        return `${field.charAt(0).toUpperCase() + field.slice(1)}: ${cleaned}`;
+      };
+
+      const messages = Object.keys(errs).map((k) => friendly(errs[k], k));
+      const message = messages.length === 1 ? messages[0] : messages.join(' ');
       return res.status(400).json({ error: 'Validation failed', message });
     }
 
