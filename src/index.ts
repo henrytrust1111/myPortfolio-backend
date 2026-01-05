@@ -17,9 +17,6 @@ app.use(cors({
 app.use(express.json());
 
 // Database Connection (use cached connection helper)
-connectToDatabase()
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB error:', err));
 
 // Routes
 app.use('/api', contactRoutes);
@@ -30,6 +27,17 @@ app.get('/health', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Connect to database before starting server
+(async () => {
+  try {
+    await connectToDatabase();
+    console.log('MongoDB connected');
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error('MongoDB error:', err);
+    process.exit(1);
+  }
+})();
+// (server is started after DB connection above)
