@@ -10,10 +10,11 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true,
-}));
+// app.use(cors({
+//   origin: process.env.FRONTEND_URL,
+//   credentials: true,
+// }));
+app.use(cors());
 app.use(express.json());
 
 // Database Connection (use cached connection helper)
