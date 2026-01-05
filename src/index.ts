@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import { connectToDatabase } from './utils/db';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import contactRoutes from './routes/contactRoutes';
@@ -15,8 +16,8 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Database Connection
-mongoose.connect(process.env.MONGODB_URI as string)
+// Database Connection (use cached connection helper)
+connectToDatabase()
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
 
